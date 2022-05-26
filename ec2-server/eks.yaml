@@ -1,0 +1,24 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
+  version: "1.21"
+
+availabilityZones:
+  - ${REGION}a
+  - ${REGION}b
+managedNodeGroups:
+  - name: nodegroup
+    desiredCapacity: 3
+    instanceType: m5.xlarge
+    ssh:
+      allow: true
+      publicKeyName: mumbai-akshaya
+# To enable all of the control plane logs, uncomment below:
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+

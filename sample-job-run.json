@@ -1,0 +1,57 @@
+{
+  "jobRun": {
+    "id": "0000000306mnu3nsmd3",
+    "name": "iceberg-job",
+    "virtualClusterId": "bf8egc23bcgkw0ac9hitobvu0",
+    "arn": "arn:aws:emr-containers:ap-south-1:ACCOUNT_ID:/virtualclusters/bf8egc23bcgkw0ac9hitobvu0/jobruns/0000000306mnu3nsmd3",
+    "state": "FAILED",
+    "clientToken": "73aa6347-cf3b-4a20-9898-97f108639b85",
+    "executionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/emr-on-eks-job-role",
+    "releaseLabel": "emr-6.5.0-latest",
+    "configurationOverrides": {
+      "applicationConfiguration": [
+        {
+          "classification": "spark-defaults",
+          "properties": {
+            "spark.kubernetes.driver.label.type": "etl",
+            "spark.sql.extensions": "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions",
+            "spark.kubernetes.executor.label.type": "etl",
+            "spark.sql.catalog.my_catalog.warehouse": "s3://s3-data-bucket/iceberg",
+            "spark.sql.catalog.my_catalog.catalog-impl": "org.apache.iceberg.aws.glue.GlueCatalog",
+            "spark.sql.catalog.my_catalog": "org.apache.iceberg.spark.SparkCatalog",
+            "spark.sql.catalog.my_catalog.io-impl": "org.apache.iceberg.aws.s3.S3FileIO"
+          }
+        }
+      ],
+      "monitoringConfiguration": {
+        "persistentAppUI": "ENABLED",
+        "cloudWatchMonitoringConfiguration": {
+          "logGroupName": "/emr-on-eks/eksworkshop-eksctl",
+          "logStreamNamePrefix": "iceberg-job"
+        },
+        "s3MonitoringConfiguration": {
+          "logUri": "s3://s3-data-bucket/hudi/logs/"
+        }
+      }
+    },
+    "jobDriver": {
+      "sparkSubmitJobDriver": {
+        "entryPoint": "s3://s3-data-bucket/spark-structured-streaming-kinesis-iceberg_2.12-1.0.jar",
+        "entryPointArguments": [
+          "s3-data-bucket",
+          "data-stream-ingest-json",
+          "ap-south-1",
+          "my_catalog.demoiceberg.eks_fargate_iceberg_kinesis",
+          "LATEST"
+        ],
+        "sparkSubmitParameters": "--class kinesis.iceberg.latefile.SparkKinesisConsumerIcebergProcessor --jars https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark3-runtime/0.13.1/iceberg-spark3-runtime-0.13.1.jar,https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark3-extensions/0.13.1/iceberg-spark3-extensions-0.13.1.jar,https://repo1.maven.org/maven2/org/apache/spark/spark-streaming-kinesis-asl_2.12/3.1.1/spark-streaming-kinesis-asl_2.12-3.1.1.jar,s3://'s3-data-bucket'/spark-sql-kinesis_2.12-1.2.1_spark-3.0-SNAPSHOT.jar,https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.15.40/bundle-2.15.40.jar,https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/2.15.40/url-connection-client-2.15.40.jar"
+      }
+    },
+    "createdAt": "2022-05-18T10:38:37+00:00",
+    "createdBy": "arn:aws:iam::ACCOUNT_ID:user/username",
+    "finishedAt": "2022-05-18T10:42:15+00:00",
+    "stateDetails": "Jobrun failed. Main Spark container terminated with errors. Please refer logs uploaded to S3/CloudWatch based on your monitoring configuration.",
+    "failureReason": "USER_ERROR",
+    "tags": {}
+  }
+}

@@ -1,0 +1,37 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: emr-on-eks
+  region: ap-south-1
+  version: "1.21"
+
+managedNodeGroups:
+- name: nodegroup
+  desiredCapacity: 0
+  instanceType: m5.large
+  ssh:
+    allow: true
+    publicKeyName: mumbai-akshaya
+fargateProfiles:
+  - name: fp-default
+    selectors:
+      # All workloads in the "default" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: default
+      # All workloads in the "kube-system" Kubernetes namespace will be
+      # scheduled onto Fargate:
+      - namespace: kube-system
+  - name: fp-emr
+    selectors:
+      # All workloads in the "dev" Kubernetes namespace matching the following
+      # label selectors will be scheduled onto Fargate:
+      - namespace: emr
+        labels:
+          type: etl
+# To enable all of the control plane logs, uncomment below:
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["*"]
+

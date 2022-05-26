@@ -1,0 +1,15 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: emr-on-eks
+  region: ap-south-1
+
+managedNodeGroups:
+- name: emrnodegroup
+  desiredCapacity: 3
+  instanceType: m5.xlarge
+  ssh:
+    enableSsm: true
+

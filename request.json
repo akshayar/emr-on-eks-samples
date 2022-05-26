@@ -1,0 +1,32 @@
+{
+    "name": "pi-4",
+    "virtualClusterId": "swemejd8y7w01fd8tw9jpxjmd",
+    "executionRoleArn": "arn:aws:iam::799223504601:role/EMRContainers-JobExecutionRole",
+    "releaseLabel": "emr-6.2.0-latest",
+    "jobDriver": {
+        "sparkSubmitJobDriver": {
+            "entryPoint": "local:///usr/lib/spark/examples/src/main/python/pi.py",
+            "sparkSubmitParameters": "--conf spark.executor.instances=2 --conf spark.executor.memory=2G --conf spark.executor.cores=2 --conf spark.driver.cores=1"
+        }
+    },
+    "configurationOverrides": {
+        "applicationConfiguration": [
+            {
+                "classification": "spark-defaults",
+                "properties": {
+                  "spark.dynamicAllocation.enabled": "false",
+                  "spark.kubernetes.executor.deleteOnTermination": "true"
+                }
+            }
+        ],
+        "monitoringConfiguration": {
+            "cloudWatchMonitoringConfiguration": {
+                "logGroupName": "/emr-on-eks/eksworkshop-eksctl",
+                "logStreamNamePrefix": "pi"
+            },
+            "s3MonitoringConfiguration": {
+                "logUri": "s3://akshaya-emr-on-eks-workshop/"
+            }
+        }
+    }
+}
