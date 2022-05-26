@@ -10,7 +10,7 @@ export VIRTUAL_CLUSTER_ID=<>
 export EMR_EKS_EXECUTION_ARN=<>
 export KINESIS_STREAM_NAME=data-stream-ingest
 export ICEBERG_TABLE_NAME=eks_ec2_iceberg_kinesis
-export ICEBERG_TARGET_DB_NAME=demohudi
+export ICEBERG_TARGET_DB_NAME=demoiceberg
 export LOG_GROUP_NAME=/emr-on-eks/eks_ec2_iceberg_kinesis
 export ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 export FARGATE_RUN=Y ##N otherwise
@@ -82,7 +82,7 @@ https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/2.15
 
 JOB_RUN_ID=`aws emr-containers start-job-run \
 --virtual-cluster-id ${VIRTUAL_CLUSTER_ID} \
---name hudi-${ICEBERG_TABLE_NAME} \
+--name iceberg-${ICEBERG_TABLE_NAME} \
 --execution-role-arn ${EMR_EKS_EXECUTION_ARN} \
 --release-label emr-6.5.0-latest \
 --job-driver '{
@@ -115,7 +115,7 @@ JOB_RUN_ID=`aws emr-containers start-job-run \
         "logStreamNamePrefix": "'${ICEBERG_TABLE_NAME}'"
       }, 
       "s3MonitoringConfiguration": {
-        "logUri": "'s3://"${S3_BUCKET_FOR_JAR}"'/hudi/logs/"
+        "logUri": "'s3://"${S3_BUCKET_FOR_JAR}"'/iceberg/logs/"
       }
     }
 }' --query id --output text`
@@ -133,7 +133,7 @@ https://repo1.maven.org/maven2/software/amazon/awssdk/url-connection-client/2.15
 
 JOB_RUN_ID=`aws emr-containers start-job-run \
 --virtual-cluster-id ${VIRTUAL_CLUSTER_ID} \
---name hudi-${ICEBERG_TABLE_NAME} \
+--name iceberg-${ICEBERG_TABLE_NAME} \
 --execution-role-arn ${EMR_EKS_EXECUTION_ARN} \
 --release-label emr-6.5.0-latest \
 --job-driver '{
@@ -168,7 +168,7 @@ JOB_RUN_ID=`aws emr-containers start-job-run \
         "logStreamNamePrefix": "'${ICEBERG_TABLE_NAME}'"
       }, 
       "s3MonitoringConfiguration": {
-        "logUri": "'s3://"${S3_BUCKET_FOR_JAR}"'/hudi/logs/"
+        "logUri": "'s3://"${S3_BUCKET_FOR_JAR}"'/iceberg/logs/"
       }
     }
 }' --query id --output text`
@@ -183,11 +183,11 @@ kubectl get pods --namespace=emr-eks-workshop-namespace
 ```
 ## View Logs
 ```shell
-aws s3 ls --recursive s3://${S3_BUCKET_FOR_JAR}/hudi/logs/${VIRTUAL_CLUSTER_ID}/jobs/${JOB_RUN_ID}
+aws s3 ls --recursive s3://${S3_BUCKET_FOR_JAR}/iceberg/logs/${VIRTUAL_CLUSTER_ID}/jobs/${JOB_RUN_ID}
 ```
 ## View Data Saved in Hudi Table
 ```shell
-aws s3 ls --recursive s3://${S3_BUCKET_FOR_DATA}/demo/hudi/${ICEBERG_TABLE_NAME}
+aws s3 ls --recursive s3://${S3_BUCKET_FOR_DATA}/demo/iceberg/${ICEBERG_TABLE_NAME}
 
 ```
 ## Query Athena
