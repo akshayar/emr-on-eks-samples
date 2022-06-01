@@ -15,6 +15,7 @@ export ROLE_NAME=emr-on-eks-job-role
 export CLUSTER_NAME=emr-on-eks-fargate
 export REGION=ap-south-1
 export VIRTUAL_CLUSTER_NAME=emr-fargate
+export KEY_NAME=oregon-key
 ```
 2. Create cluster without nodegroup
 ```shell
@@ -22,7 +23,8 @@ EKC_VPC_ID=`aws ec2 describe-vpcs --filter Name=tag:Name,Values=eksctl-emr-on-ek
 --query 'Vpcs[].VpcId' --output text `
 if [ -z "${EKC_VPC_ID}" ]
 then
-  eksctl create cluster -f ./eks.yaml 
+  envsubst < ./eks.yaml > ./eks_out.yaml  
+  eksctl create cluster -f ./eks_out.yaml 
 else
     SubnetPublicAPSOUTH1A=`aws ec2 describe-subnets \
     --filters "Name=tag:Name,Values=eksctl-emr-on-eks-cluster/SubnetPublicAPSOUTH1A" \
@@ -177,6 +179,20 @@ aws emr-containers update-role-trust-policy \
 eksctl utils associate-iam-oidc-provider --cluster ${CLUSTER_NAME} --approve
 
 export EMR_EKS_EXECUTION_ARN=$(aws iam get-role --role-name ${ROLE_NAME} --query Role.Arn --output text)
+
+
+eksctl create iamserviceaccount \
+    --name spark-account \
+    --namespace spark \
+    --cluster ${CLUSTER_NAME} \
+    --role-name "my-role-name" \
+    --attach-policy-arn arn:aws:iam::aws:policy/CloudWatchLogsFullAccess \
+    --approve \
+    --override-existing-serviceaccounts
+    
+kubectl annotate serviceaccount -n spark spark-account \
+eks.amazonaws.com/role-arn=${EMR_EKS_EXECUTION_ARN}
+    
 ```
 
 ```shell

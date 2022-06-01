@@ -3,20 +3,20 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: emr-on-eks-fargate
-  region: ap-south-1
+  name: ${CLUSTER_NAME}
+  region: ${REGION}
   version: "1.21"
 
 availabilityZones:
-  - ap-south-1a
-  - ap-south-1b
+  - ${REGION}a
+  - ${REGION}b
 managedNodeGroups:
   - name: nodegroup
     desiredCapacity: 3
     instanceType: m5.large
     ssh:
       allow: true
-      publicKeyName: mumbai-akshaya
+      publicKeyName: ${KEY_NAME}
 fargateProfiles:
   - name: fp-default
     selectors:
