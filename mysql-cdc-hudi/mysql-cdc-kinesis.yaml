@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Description": "AWS CloudFormation Sample Template for Kinesis Stream and a role to access the stream.
+  **WARNING** This template creates an RDS DB instance. You will be billed for the AWS
+  resources used if you create a stack from this template.
+Parameters:
+  StreamName:
+    Default: MyStreamName
+    Description: Kinesis Stream Name
+    Type: String
+
+Resources:
+  MyStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: !Ref StreamName
+      RetentionPeriodHours: 168
+      ShardCount: 1
+
+  IAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - 'dms.amazonaws.com'
+            Action:
+              - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonKinesisFullAccess
+Outputs:
+  KinesisArn:
+    Description: Kinesis ARN
+    Value: !GetAtt MyStream.Arn
+  IAMRoleArn:
+    Description: IAM role ARN
+    Value: !GetAtt IAMRole.Arn

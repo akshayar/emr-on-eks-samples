@@ -1,0 +1,140 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Description": "AWS CloudFormation Sample Template for creating an Amazon RDS DB instance:
+  with binlog replication enabled.
+  **WARNING** This template creates an RDS DB instance. You will be billed for the AWS
+  resources used if you create a stack from this template.
+Parameters:
+  DBName:
+    Default: mydb
+    Description: My database
+    Type: String
+    MinLength: '1'
+    MaxLength: '64'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: Must begin with a letter and contain only alphanumeric characters.
+  DBUsername:
+    NoEcho: 'true'
+    Description: Username for MySQL database access
+    Type: String
+    MinLength: '1'
+    MaxLength: '16'
+    AllowedPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
+  DBPassword:
+    NoEcho: 'true'
+    Description: Password MySQL database access
+    Type: String
+    MinLength: '8'
+    MaxLength: '41'
+    AllowedPattern: '[a-zA-Z0-9]*'
+    ConstraintDescription: must contain only alphanumeric characters.
+  MySQlVPC:
+    Description: MySQL VPC
+    Type: AWS::EC2::VPC::Id
+  MySQlSubnetA:
+    Description: First subnet
+    Type: AWS::EC2::Subnet::Id
+  MySQlSubnetB:
+    Description: First subnet
+    Type: AWS::EC2::Subnet::Id
+  ReplicationInstanceAllocatedStorage:
+    Description: >
+      The amount of storage (in gigabytes) to be initially allocated
+      for the replication instance.
+    Type: Number
+    Default: 100
+  ReplicationInstanceClass:
+    Description: >
+      The compute and memory capacity of the replication instance as specified
+      by the replication instance class.
+      Valid Values: dms.t2.micro | dms.t2.small | dms.t2.medium | dms.t2.large |
+      dms.c4.large | dms.c4.xlarge | dms.c4.2xlarge | dms.c4.4xlarge
+    Type: String
+    Default: dms.r5.xlarge
+  MySQLServer:
+    Description: >
+      The endpoint address of mysql server.
+    Type: String
+  MySQLPort:
+    Description: >
+      MySQl Port.
+    Type: String
+  DMSSecurityGroup:
+    Description: >
+      DMS Security Group.
+    Type: String
+  KinesisArn:
+    Description: >
+      Kinesis Stream ARN.
+    Type: String
+  IAMRoleArn:
+    Description: >
+      IAM role Arn to access Kinesis.
+    Type: String
+Resources:
+  ReplicationInstanceSubnetGroup:
+    Type: AWS::DMS::ReplicationSubnetGroup
+    Properties:
+      ReplicationSubnetGroupDescription: !Sub '${AWS::StackName} DMS Subnet Group'
+      ReplicationSubnetGroupIdentifier: !Sub '${AWS::StackName}-dms-subnet-group'
+      SubnetIds:
+        - Ref: MySQlSubnetA
+        - Ref: MySQlSubnetB
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-dms'
+
+  ReplicationInstance:
+    Type: AWS::DMS::ReplicationInstance
+    Properties:
+      AllocatedStorage: !Ref ReplicationInstanceAllocatedStorage
+      AllowMajorVersionUpgrade: false
+      AutoMinorVersionUpgrade: false
+      MultiAZ: false
+      PubliclyAccessible: false
+      ReplicationInstanceClass: !Sub '${ReplicationInstanceClass}'
+      ReplicationInstanceIdentifier: !Sub '${AWS::StackName}-replication-instance'
+      ReplicationSubnetGroupIdentifier: !Ref ReplicationInstanceSubnetGroup
+      VpcSecurityGroupIds:
+        - Ref: DMSSecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}-replication-instance'
+  DmsEndpointSource:
+    Type: AWS::DMS::Endpoint
+    Properties:
+      DatabaseName: !Ref DBName
+      EndpointType: 'source'
+      EngineName: MySQL
+      ServerName: !Ref MySQLServer
+      Port: !Ref MySQLPort
+      Username: !Ref DBUsername
+      Password: !Ref DBPassword
+      Tags:
+        -
+          Key: Name
+          Value: !Sub '${AWS::StackName}-rds-source'
+  DmsEndpointTarget:
+    Type: AWS::DMS::Endpoint
+    Properties:
+      EndpointType: 'target'
+      EngineName: Kinesis
+      KinesisSettings:
+        IncludeControlDetails: false
+        IncludeNullAndEmpty: false
+        IncludePartitionValue: true
+        IncludeTableAlterOperations: true
+        IncludeTransactionDetails: true
+        MessageFormat: json
+        PartitionIncludeSchemaTable: false
+        ServiceAccessRoleArn: !Ref IAMRoleArn
+        StreamArn: !Ref KinesisArn
+      Tags:
+        -
+          Key: Name
+          Value: !Sub '${AWS::StackName}-dms-target-endpoint'
+Outputs:
+  DMSSecurityGroup:
+    Description: DMSSecurityGroup
+    Value: !Ref DMSSecurityGroup
