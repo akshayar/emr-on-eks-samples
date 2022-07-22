@@ -81,11 +81,27 @@ Resources:
   RDSDBSecurityGroupIngress:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      IpProtocol: tcp
+      IpProtocol: -1
       FromPort: 0
       ToPort: 65535
       SourceSecurityGroupId: !Ref DMSSecurityGroup
       GroupId: !Ref RDSDBSecurityGroup
+  RDSDBSecurityGroupSelfIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: -1
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref RDSDBSecurityGroup
+      GroupId: !Ref RDSDBSecurityGroup
+  DMSSecurityGroupSelfIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId: !Ref DMSSecurityGroup
+      GroupId: !Ref DMSSecurityGroup
   RDSDBSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -173,10 +189,10 @@ Resources:
           cd /home/ec2-user
           DIR="aws-database-migration-samples"
           if [ ! -d "$DIR" ]; then
-              git clone https://github.com/aws-samples/aws-database-migration-samples.git
+              git clone https://github.com/akshayar/emr-on-eks-samples.git
           fi
-          cd aws-database-migration-samples/mysql/sampledb/v1
-          mysql -u ${DBUsername}  -h ${MyDB.Endpoint.Address} -P ${MyDB.Endpoint.Port} -D ${DBName} --password="${DBPassword}" < schema/create_dms_sample.sql
+          cd emr-on-eks-samples/mysql-cdc-hudi/mysql/
+          mysql -u ${DBUsername}  -h ${MyDB.Endpoint.Address} -P ${MyDB.Endpoint.Port} -D ${DBName} --password="${DBPassword}" < install-rds.sql
       Monitoring: false
       Tags:
         -

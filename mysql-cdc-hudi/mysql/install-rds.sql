@@ -34,8 +34,8 @@ source ./create_dms_sample.sql
 #
 #############################
 
-source ./create_dms_user.sql
-source ./dms_user_privileges.sql
+#source ./create_dms_user.sql
+#source ./dms_user_privileges.sql
 
 
 #############################
