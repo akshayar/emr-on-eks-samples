@@ -152,12 +152,18 @@ Outputs:
   MySQLPort:
     Value: !GetAtt MySQLStack.Outputs.MySQLEndpointPort
     Description: MySQLEndpointPort
+  SQLConnectCommand:
+    Value: !Sub "mysql -u ${DBUsername}  -h ${MySQLStack.Outputs.MySQLEndpointName} -P ${MySQLStack.Outputs.MySQLEndpointPort} -D ${DBName} --password"
+    Description: DMSSecurityGroup
   MySQLSecurityGroup:
     Value: !GetAtt MySQLStack.Outputs.MySQLSecurityGroupId
     Description: MySQLEndpointPort
   DMSSecurityGroup:
     Value: !GetAtt MySQLStack.Outputs.DMSSecurityGroup
     Description: DMSSecurityGroup
-  SQLConnectCommand:
-    Value: !Sub "mysql -u ${DBUsername}  -h ${MySQLStack.Outputs.MySQLEndpointName} -P ${MySQLStack.Outputs.MySQLEndpointPort} -D ${DBName} --password"
-    Description: DMSSecurityGroup
+  ReplicationTaskArn:
+    Description: DMSReplicationTask
+    Value: !GetAtt DMSStack.Outputs.ReplicationTaskArn
+  SecretName:
+    Description: Secret Name
+    Value: !Ref DBInstanceID

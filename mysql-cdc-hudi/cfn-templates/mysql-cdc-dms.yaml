@@ -152,3 +152,6 @@ Outputs:
   DMSSecurityGroup:
     Description: DMSSecurityGroup
     Value: !Ref DMSSecurityGroup
+  ReplicationTaskArn:
+    Description: DMSReplicationTask
+    Value: !Ref DMSReplicationTask

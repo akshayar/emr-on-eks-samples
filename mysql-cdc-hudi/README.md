@@ -49,13 +49,48 @@ aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" --query Subnet
 ```   
 8. Deploy to create database, dms and Kinesis
 ```
-aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc.yaml --stack-name dms3 \
---parameter-overrides DBUsername=root DBPassword=Admin123 MySQlVPC=vpc-d002cabb MySQlSubnetA=subnet-7d90f906 \
-MySQlSubnetB=subnet-e07553ac MyStreamName=dms S3BucketName=aksh-code-binaries S3KeyPrefix=cft/emr-on-eks/dms \
-KinesisVPCEndpointSG=sg-28d5f054 \
---capabilities CAPABILITY_NAMED_IAM
+SUBNET_1=<>
+SUBNET_2=<>
+DB_USER=<>
+DB_PASSWORD=<>
+KINESIS_STREAM_NAME=<>
+VPC_ENDPOINT_SG=<>
+STACK_NAME=dms3
+REGION=<region>
+
+aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc.yaml --stack-name ${STACK_NAME} \
+--parameter-overrides DBUsername=${DB_USER} DBPassword=${DB_PASSWORD} MySQlVPC=${VPC_ID} MySQlSubnetA=${SUBNET_1} MySQlSubnetB=${SUBNET_2} \
+ MyStreamName=${KINESIS_STREAM_NAME} S3BucketName=${BUCKET_NAME} S3KeyPrefix=cft/emr-on-eks/dms KinesisVPCEndpointSG=${VPC_ENDPOINT_SG} \
+--capabilities CAPABILITY_NAMED_IAM --region ${REGION}
+
+aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query "Stacks[0].Outputs[].[OutputKey,OutputValue]" --output text --region ${REGION}
 
 ```
+9. Validate MySQL. Refer stask output with name "SQLConnectCommand" . Use the command to connect to MySQL db. Ensure that dms_sample.trade_info table is created. 
+10. Validate DMS repliation task. 
+   1. Start the replication task with command. Refer stack out with name "ReplicationTaskArn". 
+     ```
+     aws dms aws dms start-replication-task --replication-task-arn <> --region ${REGION}
+     ```
+   2. Ingest data in MySQL.
+   ```
+   cd ${SOURCE_CODE_ROOT}/random-data-generator
+   ./build.sh
+   export DB_HOST_NAME=<DB_HOST_NAME stack output MySQLServer>
+   export DB_PORT=<port stack output MySQLPort>
+   export DB_NAME=dms_sample
+   export SECRET_NAME=<secret-name stack output SecretName>
+   export SECRET_REGION=${REGION}
+   ./run.sh mysql
+   ```
+   3. Consume data from Kinesis to ensure that replication is working. Execute following command in another window. The output will be the data that is getting pushed to Kinesis data stream. 
+   ```
+   cd ${SOURCE_CODE_ROOT}/kinesis-consumer-printer
+   ./build.sh
+   export KINESIS_STREAM_NAME=${KINESIS_STREAM_NAME}
+   export KINESIS_REGION=${REGION}
+   ./run.sh"
+   ```
 ### Deploy EMR on EKS Infrastructure
 ## Start DMS Migration and CDC
 ## Validate DMS Migration
