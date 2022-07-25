@@ -8,11 +8,11 @@ export S3_BUCKET_FOR_JAR=${S3_BUCKET}
 export S3_BUCKET_FOR_DATA=${S3_BUCKET}
 export VIRTUAL_CLUSTER_ID=<>
 export EMR_EKS_EXECUTION_ARN=<>
-export KAFKA_BOOTSTRAP=ip-192-168-33-209.ap-south-1.compute.internal:9092
+export KAFKA_BOOTSTRAP=ip-192-168-20-233.ap-south-1.compute.internal:9092
 export KAFKA_TOPIC=data-kafka-json
 export ICEBERG_TABLE_NAME=eks_ec2_iceberg_kafka
 export ICEBERG_TARGET_DB_NAME=demoiceberg
-export LOG_GROUP_NAME=/emr-on-eks/eksworkshop-eksctl
+export LOG_GROUP_NAME=/emr-on-eks/demoiceberg
 export ACCOUNT_ID=`aws sts get-caller-identity --output text --query Account`
 export FARGATE_RUN=Y ##N otherwise
 ```
@@ -60,7 +60,7 @@ JOB_RUN_ID=`aws emr-containers start-job-run \
     "sparkSubmitJobDriver": {
         "entryPoint": "s3://'"${S3_BUCKET_FOR_JAR}"'/spark-structured-streaming-kafka-iceberg_2.12-1.0.jar",
         "entryPointArguments": ["'${S3_BUCKET_FOR_DATA}'", "'${KAFKA_BOOTSTRAP}'","'${KAFKA_TOPIC}'", "my_catalog.'${ICEBERG_TARGET_DB_NAME}'.'${ICEBERG_TABLE_NAME}'", "LATEST"],
-        "sparkSubmitParameters": "--class kafka.iceberg.latefile.SparkKakfaConsumerIcebergProcessor --jars '${JARS}'"
+        "sparkSubmitParameters": "--conf spark.sql.catalog.my_catalog.client.factory=com.aksh.iceberg.ClientForFargateRun --class kafka.iceberg.latefile.SparkKakfaConsumerIcebergProcessor --jars '${JARS}'"
         }
     }' \
 --configuration-overrides '{
@@ -74,7 +74,6 @@ JOB_RUN_ID=`aws emr-containers start-job-run \
           "spark.sql.catalog.my_catalog.warehouse":"s3://'${S3_BUCKET_FOR_DATA}'/iceberg" ,\
           "spark.sql.catalog.my_catalog.catalog-impl":"org.apache.iceberg.aws.glue.GlueCatalog" ,\
           "spark.sql.catalog.my_catalog.io-impl":"org.apache.iceberg.aws.s3.S3FileIO",\
-          "spark.sql.catalog.my_catalog.client.factory":"org.apache.iceberg.aws.AssumeRoleAwsClientFactory", \
           "spark.sql.catalog.my_catalog.client.assume-role.arn":"'${EMR_EKS_EXECUTION_ARN}'", \
           "spark.sql.catalog.my_catalog.client.assume-role.region":"ap-south-1"
          }

@@ -9,18 +9,18 @@ metadata:
 
 
 vpc:
-  id: "EKC_VPC_ID"
+  id: "${EKC_VPC_ID}"
   subnets:
     private:
       ap-south-1a:
-        id: "SubnetPrivateAPSOUTH1A"
+        id: "${SubnetPrivateAPSOUTH1A}"
       ap-south-1b:
-        id: "SubnetPrivateAPSOUTH1B"
+        id: "${SubnetPrivateAPSOUTH1B}"
     public:
       ap-south-1a:
-        id: "SubnetPublicAPSOUTH1A"
+        id: "${SubnetPublicAPSOUTH1A}"
       ap-south-1b:
-        id: "SubnetPublicAPSOUTH1B"
+        id: "${SubnetPublicAPSOUTH1B}"
 managedNodeGroups:
   - name: nodegroup
     desiredCapacity: 3

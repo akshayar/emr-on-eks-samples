@@ -64,6 +64,10 @@ Parameters:
     Description: >
       DMS Security Group.
     Type: String
+  KinesisVPCEndpointSG:
+    Description: >
+      Security Group configured in VPC Endpoint for Kinesis.
+    Type: String
   KinesisArn:
     Description: >
       Kinesis Stream ARN.
@@ -99,6 +103,7 @@ Resources:
       ReplicationSubnetGroupIdentifier: !Ref ReplicationInstanceSubnetGroup
       VpcSecurityGroupIds:
         - Ref: DMSSecurityGroup
+        - Ref: KinesisVPCEndpointSG
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-replication-instance'
@@ -135,6 +140,14 @@ Resources:
         -
           Key: Name
           Value: !Sub '${AWS::StackName}-dms-target-endpoint'
+  DMSReplicationTask:
+    Type: AWS::DMS::ReplicationTask
+    Properties:
+      SourceEndpointArn: !Ref DmsEndpointSource
+      TargetEndpointArn: !Ref DmsEndpointTarget
+      ReplicationInstanceArn: !Ref ReplicationInstance
+      MigrationType: full-load-and-cdc
+      TableMappings: "{\"rules\":[{\"rule-type\":\"selection\",\"rule-id\":\"1\",\"rule-name\":\"1\",\"object-locator\":{\"schema-name\":\"dms_sample\",\"table-name\":\"trade_info\"},\"rule-action\":\"include\",\"filters\":[]}]}"
 Outputs:
   DMSSecurityGroup:
     Description: DMSSecurityGroup

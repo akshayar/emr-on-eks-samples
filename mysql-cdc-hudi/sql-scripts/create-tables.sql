@@ -5,5 +5,6 @@ create table trade_info
   share_price DECIMAL(18,4) NOT NULL,
   trade_time DATETIME(6) NOT NULL,
   trader_id BIGINT NOT NULL,
+  status VARCHAR(10) NOT NUll
   constraint trade_info_pk primary key(id)
 );

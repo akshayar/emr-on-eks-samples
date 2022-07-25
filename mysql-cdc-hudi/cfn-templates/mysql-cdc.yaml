@@ -91,6 +91,10 @@ Parameters:
       dms.c4.large | dms.c4.xlarge | dms.c4.2xlarge | dms.c4.4xlarge
     Type: String
     Default: dms.r5.xlarge
+  KinesisVPCEndpointSG:
+    Description: >
+      Security Group configured in VPC Endpoint for Kinesis.
+    Type: String
 Resources:
   MySQLStack:
     Type: AWS::CloudFormation::Stack
@@ -107,6 +111,7 @@ Resources:
         MySQlVPC: !Ref MySQlVPC
         MySQlSubnetA: !Ref MySQlSubnetA
         MySQlSubnetB: !Ref MySQlSubnetB
+        KinesisVPCEndpointSG: !Ref KinesisVPCEndpointSG
   KinesisStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -131,6 +136,7 @@ Resources:
         MySQLServer: !GetAtt MySQLStack.Outputs.MySQLEndpointName
         MySQLPort: !GetAtt MySQLStack.Outputs.MySQLEndpointPort
         DMSSecurityGroup: !GetAtt MySQLStack.Outputs.DMSSecurityGroup
+        KinesisVPCEndpointSG: !Ref KinesisVPCEndpointSG
         KinesisArn: !GetAtt KinesisStack.Outputs.KinesisArn
         IAMRoleArn: !GetAtt KinesisStack.Outputs.IAMRoleArn
 Outputs:
@@ -147,8 +153,11 @@ Outputs:
     Value: !GetAtt MySQLStack.Outputs.MySQLEndpointPort
     Description: MySQLEndpointPort
   MySQLSecurityGroup:
-    Value: !GetAtt MySQLStack.Outputs.MySQLSecurityGroup
+    Value: !GetAtt MySQLStack.Outputs.MySQLSecurityGroupId
     Description: MySQLEndpointPort
   DMSSecurityGroup:
     Value: !GetAtt MySQLStack.Outputs.DMSSecurityGroup
+    Description: DMSSecurityGroup
+  SQLConnectCommand:
+    Value: !Sub "mysql -u ${DBUsername}  -h ${MySQLStack.Outputs.MySQLEndpointName} -P ${MySQLStack.Outputs.MySQLEndpointPort} -D ${DBName} --password"
     Description: DMSSecurityGroup
