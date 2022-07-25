@@ -56,35 +56,37 @@ DB_USER=<>
 DB_PASSWORD=<>
 STACK_NAME=dms3
 REGION=<region>
+KEY_NAME=<SSH Key Name>
 
 aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc.yaml --stack-name ${STACK_NAME} \
 --parameter-overrides DBUsername=${DB_USER} DBPassword=${DB_PASSWORD} MySQlVPC=${VPC_ID} MySQlSubnetA=${SUBNET_1} MySQlSubnetB=${SUBNET_2} \
- MyStreamName=dms-stream S3BucketName=${BUCKET_NAME} S3KeyPrefix=cft/emr-on-eks/dms  \
+ MyStreamName=dms-stream S3BucketName=${BUCKET_NAME} S3KeyPrefix=cft/emr-on-eks/dms EC2KeyName=${KEY_NAME} \
 --capabilities CAPABILITY_NAMED_IAM --region ${REGION}
 
 aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query "Stacks[0].Outputs[].[OutputKey,OutputValue]" --output text --region ${REGION}
 
 ```
-9. Validate MySQL. Refer stask output with name "SQLConnectCommand" . Use the command to connect to MySQL db. Ensure that dms_sample.trade_info table is created.
+9. Validate MySQL. Refer stask output with name `SQLConnectCommand` . Use the command to connect to MySQL db. Ensure that dms_sample.trade_info table is created.
 
 ### Start DMS replication task 
-1. Start the replication task with command. Refer stack out with name "ReplicationTaskArn". 
+1. Start the replication task with command. Refer stack out with name `ReplicationTaskArn`. 
 ```shell
 aws dms aws dms start-replication-task --replication-task-arn <> --region ${REGION}
 ```
 ### Ingest fake data  and Validate DMS replication task
-1. Ingest fake data in MySQL.
+1. SSH to EC2 instance to ingest fake data. Refer stack output with name `EC2InstancePrivateDNS` for the private DNS name of the EC2 instance. 
 ```shell
-cd ${SOURCE_CODE_ROOT}/random-data-generator
+ssh -i <key-path> ec2-user@<EC2InstancePrivateDNS>
+cd emr-on-eks-samples/random-data-generator
 ./build.sh
 export DB_HOST_NAME=<DB_HOST_NAME stack output MySQLServer>
 export DB_PORT=<port stack output MySQLPort>
 export DB_NAME=dms_sample
 export SECRET_NAME=<secret-name stack output SecretName>
-export SECRET_REGION=${REGION}
+export SECRET_REGION=<region>
 ./run.sh mysql
 ```
-2. Consume data from Kinesis to ensure that replication is working. Execute following command in another window. The output will be the data that is getting pushed to Kinesis data stream. 
+2. Consume data from Kinesis to ensure that replication is working. Execute following command in another window on Cloud9. The output will be the data that is getting pushed to Kinesis data stream. 
 ```shell
 cd ${SOURCE_CODE_ROOT}/kinesis-consumer-printer
 ./build.sh

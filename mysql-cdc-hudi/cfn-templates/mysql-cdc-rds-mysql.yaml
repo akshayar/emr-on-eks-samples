@@ -66,7 +66,6 @@ Parameters:
   EC2KeyName:
     Description: Ec2 Keyname
     Type: String
-    Default: aksh-mumbai
 Resources:
   RDSDBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -223,3 +222,6 @@ Outputs:
   DMSSecurityGroup:
     Description: MySQL Security group
     Value: !Ref DMSSecurityGroup
+  EC2InstancePrivateDNS:
+    Description: Private DNS of the EC2 instance
+    Value: !GetAtt EC2Instance.PrivateDnsName

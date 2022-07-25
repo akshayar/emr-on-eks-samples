@@ -91,6 +91,9 @@ Parameters:
       dms.c4.large | dms.c4.xlarge | dms.c4.2xlarge | dms.c4.4xlarge
     Type: String
     Default: dms.r5.xlarge
+  EC2KeyName:
+    Description: Ec2 Keyname
+    Type: String
 Resources:
   MySQLStack:
     Type: AWS::CloudFormation::Stack
@@ -107,6 +110,7 @@ Resources:
         MySQlVPC: !Ref MySQlVPC
         MySQlSubnetA: !Ref MySQlSubnetA
         MySQlSubnetB: !Ref MySQlSubnetB
+        EC2KeyName: !Ref EC2KeyName
   KinesisStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -161,3 +165,6 @@ Outputs:
   SecretName:
     Description: Secret Name
     Value: !Ref DBInstanceID
+  EC2InstancePrivateDNS:
+    Description: Private DNS of the EC2 instance
+    Value: !GetAtt MySQLStack.Outputs.EC2InstancePrivateDNS
