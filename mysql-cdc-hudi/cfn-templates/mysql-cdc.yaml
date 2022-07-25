@@ -91,10 +91,6 @@ Parameters:
       dms.c4.large | dms.c4.xlarge | dms.c4.2xlarge | dms.c4.4xlarge
     Type: String
     Default: dms.r5.xlarge
-  KinesisVPCEndpointSG:
-    Description: >
-      Security Group configured in VPC Endpoint for Kinesis.
-    Type: String
 Resources:
   MySQLStack:
     Type: AWS::CloudFormation::Stack
@@ -111,7 +107,6 @@ Resources:
         MySQlVPC: !Ref MySQlVPC
         MySQlSubnetA: !Ref MySQlSubnetA
         MySQlSubnetB: !Ref MySQlSubnetB
-        KinesisVPCEndpointSG: !Ref KinesisVPCEndpointSG
   KinesisStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -136,7 +131,6 @@ Resources:
         MySQLServer: !GetAtt MySQLStack.Outputs.MySQLEndpointName
         MySQLPort: !GetAtt MySQLStack.Outputs.MySQLEndpointPort
         DMSSecurityGroup: !GetAtt MySQLStack.Outputs.DMSSecurityGroup
-        KinesisVPCEndpointSG: !Ref KinesisVPCEndpointSG
         KinesisArn: !GetAtt KinesisStack.Outputs.KinesisArn
         IAMRoleArn: !GetAtt KinesisStack.Outputs.IAMRoleArn
 Outputs:

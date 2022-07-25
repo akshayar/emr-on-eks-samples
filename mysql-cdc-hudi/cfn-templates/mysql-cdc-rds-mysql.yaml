@@ -67,10 +67,6 @@ Parameters:
     Description: Ec2 Keyname
     Type: String
     Default: aksh-mumbai
-  KinesisVPCEndpointSG:
-    Description: >
-      Security Group configured in VPC Endpoint for Kinesis.
-    Type: String
 Resources:
   RDSDBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -149,7 +145,6 @@ Resources:
       PubliclyAccessible: true
       VPCSecurityGroups:
         - !Ref RDSDBSecurityGroup
-        - !Ref KinesisVPCEndpointSG
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}-mysql'
@@ -166,7 +161,6 @@ Resources:
       SubnetId: !Ref MySQlSubnetA
       SecurityGroupIds:
         - !Ref RDSDBSecurityGroup
-        - !Ref KinesisVPCEndpointSG
       UserData:
         Fn::Base64: !Sub |
           Content-Type: multipart/mixed; boundary="//"

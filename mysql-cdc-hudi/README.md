@@ -6,33 +6,34 @@
 # Deployment Architecture
 # Build , Deployment and Run
 ## Deploy Infrastructure
-### Deploy Database, DMS and Kinesis
+### Deploy Database, DMS and Kinesis 
 1. Create a VPC , public and private subnets. 
 2. Create a SSH key in the target region and download pem file.    
 3. Create a Cloud9 instance in the public subnet of the VPC. Upload SSH keys to Cloud9 and change permission to 400.
 4. Create an IAM role for EC2 and add arn:aws:iam::aws:policy/AmazonEC2FullAccess, arn:aws:iam::aws:policy/SecretsManagerReadWrite , arn:aws:iam::aws:policy/IAMFullAccess and arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore roles. Assign the role to EC2 instance of Cloud9. Go to Settings -> AWS Settings and disable "AWS managed temporary credentials". Validate the role by executing following commands -
-    ```
+    ```shell
     
     aws sts get-caller-identity
     
     ```
  5. Install Java 8 and Maven 3.1+.
-```
+```shell
+## Install Java
 sudo yum -y update
 sudo yum -y install java-1.8.0-openjdk-devel
 sudo update-alternatives --config java
 sudo update-alternatives --config javac
-```
-```
+
+## Instal Maven
 sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
 sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
 sudo yum install -y apache-maven
 ``` 
 6. Create a bucket for cloudformation templates. 
-   ```
-   export BUCKET_NAME=<>
-   aws s3 mb s3://${BUCKET_NAME}
-   ```
+```shell
+export BUCKET_NAME=<>
+aws s3 mb s3://${BUCKET_NAME}
+```
 7. Clone GitHub repository and copy cloudformation templats to S3.
 ```shell
 git clone https://github.com/akshayar/emr-on-eks-samples.git
@@ -48,54 +49,51 @@ VPC_ID=`aws ec2 describe-instances   --instance-ids ${INSTANCE_ID} --query Reser
 aws ec2 describe-subnets --filters "Name=vpc-id,Values=${VPC_ID}" --query Subnets[].[VpcId,AvailabilityZone,CidrBlock,SubnetId] --output text 
 ```   
 8. Deploy to create database, dms and Kinesis
-```
-SUBNET_1=<>
-SUBNET_2=<>
+```shell
+SUBNET_1=<Private Subnet>
+SUBNET_2=<Private Subnet>
 DB_USER=<>
 DB_PASSWORD=<>
-KINESIS_STREAM_NAME=<>
-VPC_ENDPOINT_SG=<>
 STACK_NAME=dms3
 REGION=<region>
 
 aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc.yaml --stack-name ${STACK_NAME} \
 --parameter-overrides DBUsername=${DB_USER} DBPassword=${DB_PASSWORD} MySQlVPC=${VPC_ID} MySQlSubnetA=${SUBNET_1} MySQlSubnetB=${SUBNET_2} \
- MyStreamName=${KINESIS_STREAM_NAME} S3BucketName=${BUCKET_NAME} S3KeyPrefix=cft/emr-on-eks/dms KinesisVPCEndpointSG=${VPC_ENDPOINT_SG} \
+ MyStreamName=dms-stream S3BucketName=${BUCKET_NAME} S3KeyPrefix=cft/emr-on-eks/dms  \
 --capabilities CAPABILITY_NAMED_IAM --region ${REGION}
 
 aws cloudformation describe-stacks --stack-name ${STACK_NAME} --query "Stacks[0].Outputs[].[OutputKey,OutputValue]" --output text --region ${REGION}
 
 ```
-9. Validate MySQL. Refer stask output with name "SQLConnectCommand" . Use the command to connect to MySQL db. Ensure that dms_sample.trade_info table is created. 
-10. Validate DMS repliation task. 
-   1. Start the replication task with command. Refer stack out with name "ReplicationTaskArn". 
-     ```
-     aws dms aws dms start-replication-task --replication-task-arn <> --region ${REGION}
-     ```
-   2. Ingest data in MySQL.
-   ```
-   cd ${SOURCE_CODE_ROOT}/random-data-generator
-   ./build.sh
-   export DB_HOST_NAME=<DB_HOST_NAME stack output MySQLServer>
-   export DB_PORT=<port stack output MySQLPort>
-   export DB_NAME=dms_sample
-   export SECRET_NAME=<secret-name stack output SecretName>
-   export SECRET_REGION=${REGION}
-   ./run.sh mysql
-   ```
-   3. Consume data from Kinesis to ensure that replication is working. Execute following command in another window. The output will be the data that is getting pushed to Kinesis data stream. 
-   ```
-   cd ${SOURCE_CODE_ROOT}/kinesis-consumer-printer
-   ./build.sh
-   export KINESIS_STREAM_NAME=${KINESIS_STREAM_NAME}
-   export KINESIS_REGION=${REGION}
-   ./run.sh"
-   ```
+9. Validate MySQL. Refer stask output with name "SQLConnectCommand" . Use the command to connect to MySQL db. Ensure that dms_sample.trade_info table is created.
+
+### Start DMS replication task 
+1. Start the replication task with command. Refer stack out with name "ReplicationTaskArn". 
+```shell
+aws dms aws dms start-replication-task --replication-task-arn <> --region ${REGION}
+```
+### Ingest fake data  and Validate DMS replication task
+1. Ingest fake data in MySQL.
+```shell
+cd ${SOURCE_CODE_ROOT}/random-data-generator
+./build.sh
+export DB_HOST_NAME=<DB_HOST_NAME stack output MySQLServer>
+export DB_PORT=<port stack output MySQLPort>
+export DB_NAME=dms_sample
+export SECRET_NAME=<secret-name stack output SecretName>
+export SECRET_REGION=${REGION}
+./run.sh mysql
+```
+2. Consume data from Kinesis to ensure that replication is working. Execute following command in another window. The output will be the data that is getting pushed to Kinesis data stream. 
+```shell
+cd ${SOURCE_CODE_ROOT}/kinesis-consumer-printer
+./build.sh
+export KINESIS_STREAM_NAME=dms-stream
+export KINESIS_REGION=${REGION}
+./run.sh"
+```
+4. <Refer to sample messages in Kinesis>
 ### Deploy EMR on EKS Infrastructure
-## Start DMS Migration and CDC
-## Validate DMS Migration
-### Insert Fake Data
-### Consume Kinesis Data Stream to validate
 ## Build and Run Hudi Spark Streaming Job
 ### Validate Hudi raw data lake by querying from Athena
 ## Build and Schedule Hudi Spark batch job
