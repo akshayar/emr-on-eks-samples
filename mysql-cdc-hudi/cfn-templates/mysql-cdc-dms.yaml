@@ -139,7 +139,7 @@ Resources:
     Type: 'AWS::EC2::VPCEndpoint'
     Properties:
       VpcEndpointType: Interface
-      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.kinesis'
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.kinesis-streams'
       VpcId: !Ref MySQlVPC
       SubnetIds:
         - !Ref MySQlSubnetA
