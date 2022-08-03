@@ -58,7 +58,7 @@ STACK_NAME=dms3
 REGION=<region>
 KEY_NAME=<SSH Key Name>
 
-aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc.yaml --stack-name ${STACK_NAME} \
+aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/cfn-templates/mysql-cdc.yaml --stack-name ${STACK_NAME} \
 --parameter-overrides DBUsername=${DB_USER} DBPassword=${DB_PASSWORD} MySQlVPC=${VPC_ID} MySQlSubnetA=${SUBNET_1} MySQlSubnetB=${SUBNET_2} \
  MyStreamName=dms-stream S3BucketName=${BUCKET_NAME} S3KeyPrefix=cft/emr-on-eks/dms EC2KeyName=${KEY_NAME} \
 --capabilities CAPABILITY_NAMED_IAM --region ${REGION}
