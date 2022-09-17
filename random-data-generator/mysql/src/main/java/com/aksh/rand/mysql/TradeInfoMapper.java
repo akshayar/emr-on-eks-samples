@@ -23,23 +23,28 @@ public interface TradeInfoMapper {
     TradeInfo getTrade(@Param("id") Long id);
 
     @Insert("INSERT INTO trade_info "
-    		+ "VALUES (#{id}, #{stock_symbol}, #{shares}, #{share_price}, #{trade_time},#{trader_id},#{status});")
+    		+ "VALUES (#{id}, #{stock_symbol}, #{shares}, #{share_price}, #{trade_time},#{trader_id},#{status},#{last_updated},#{last_updated_by});")
     void insertTrade(@Param("id") Long id,
                      @Param("stock_symbol") String stock_symbol,
                      @Param("shares") Double shares,
                      @Param("share_price") Double share_price,
                      @Param("trade_time") Date trade_time,
                      @Param("trader_id") Long trader_id,
-                     @Param("status") String status);
+                     @Param("status") String status,
+                     @Param("last_updated") Date last_updated,
+                     @Param("last_updated_by") String last_updated_by);
 
     @Update("UPDATE trade_info "
             + "SET shares= #{shares}, share_price= #{share_price}, " +
-            "  trade_time= #{trade_time}, status= #{status}" +
+            "  trade_time= #{trade_time}, status= #{status}, " +
+            "  last_updated=#{last_updated} , last_updated_by=#{last_updated_by} "+
             " WHERE id = #{id} ;")
     void updateTrade(@Param("id") Long id,
                      @Param("shares") Double shares,
                      @Param("share_price") Double share_price,
                      @Param("trade_time") Date trade_time,
-                     @Param("status") String status);
+                     @Param("status") String status,
+                     @Param("last_updated") Date last_updated,
+                     @Param("last_updated_by") String last_updated_by);
 
 }

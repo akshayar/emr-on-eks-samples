@@ -39,7 +39,7 @@ public class Main implements CommandLineRunner {
         log.warn("Proerties:"+System.getProperties());
 
         Random random=new Random();
-
+        log.warn("Delay:"+System.getProperty("delay"));
         String delay=Optional.ofNullable(System.getProperty("delay"))
                 .filter(s->!StringUtils.isEmpty(s))
                 .orElse("10");
@@ -83,7 +83,7 @@ public class Main implements CommandLineRunner {
         TradeInfo trade=new TradeInfo(id,symbol,shares,price,traderId,status,date);
         log.info("inserting "+trade);
         boolean success=prodIdQueue.offer(trade,5, TimeUnit.SECONDS);
-        tradeInfoMapper.insertTrade(id,symbol,shares,price,date,traderId,status);
+        tradeInfoMapper.insertTrade(id,symbol,shares,price,date,traderId,status,new Date(),"test");
 
     }
 
@@ -97,7 +97,7 @@ public class Main implements CommandLineRunner {
             Double price=faker.number().randomDouble(2,100,500);
             String status="CLOSED";
             Date date=new Date();
-            tradeInfoMapper.updateTrade(trade.getId(),shares,price,date,status);
+            tradeInfoMapper.updateTrade(trade.getId(),shares,price,date,status,new Date(),"test");
         }
     }
 
