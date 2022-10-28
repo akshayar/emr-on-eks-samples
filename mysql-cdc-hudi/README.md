@@ -114,8 +114,8 @@ aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mys
 aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc-dms.yaml --stack-name dms \
 --parameter-overrides DBUsername=root DBPassword=Admin123 MySQlVPC=vpc-d002cabb MySQlSubnetA=subnet-7d90f906 \
 MySQlSubnetB=subnet-e07553ac MySQLServer=mydbinstance.cntgfu50evyo.ap-south-1.rds.amazonaws.com MySQLPort=3306 \
-DMSSecurityGroup=sg-023a10599bcf1d082 KinesisArn=arn:aws:kinesis:ap-south-1:229369268201:stream/MyStreamName \
-IAMRoleArn=arn:aws:iam::229369268201:role/kinesis-IAMRole-DLR2UDGVT427
+DMSSecurityGroup=sg-023a10599bcf1d082 KinesisArn=arn:aws:kinesis:ap-south-1:ACCOUNT_ID:stream/MyStreamName \
+IAMRoleArn=arn:aws:iam::ACCOUNT_ID:role/kinesis-IAMRole-DLR2UDGVT427
 
 aws cloudformation deploy --template-file ${SOURCE_CODE_ROOT}/mysql-cdc-hudi/mysql-cdc.yaml --stack-name dms3 \
 --parameter-overrides DBUsername=root DBPassword=Admin123 MySQlVPC=vpc-d002cabb MySQlSubnetA=subnet-7d90f906 \
